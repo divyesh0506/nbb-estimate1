@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>New Bharat Boring Estimate</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #777; padding: 8px; text-align: left; }
+    th { background: #f0f0f0; }
+    button { margin: 5px; padding: 8px 12px; }
+    @media print {
+      button { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <h2>New Bharat Boring Estimate</h2>
+  <button onclick="addRow()">Add Row</button>
+  <button onclick="window.print()">Print / Save PDF</button>
+  <button onclick="shareWhatsApp()">Share on WhatsApp</button>
+
+  <table id="estimateTable">
+    <thead>
+      <tr><th>Sr. No</th><th>Particular</th><th>Amount (₹)</th></tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2"><strong>Total</strong></td>
+        <td id="totalAmt">0.00</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <script>
+    const items = [
+      'Block Sleeve Fitting','Block Body Boring','Block Sleeve Removing','Crank Cutting',
+      'Crank Out','Crank Oil Seal','Crank Collar Welding','Connecting Road Bush Bore',
+      'Connecting Road Panel Bore','Connecting Road Out Checking','Cam Bush Bore',
+      'Cam Grinding','Cam A/c. Grinding','Main Line Boring','Main Connecting Fitting',
+      'Piston Top Cutting','Head Ring Fitting & Seat Cutting','Guide Fitting / Valve Polish',
+      'Head Surfacing','Head Tapped Setting','Head Chockup Remove','Head Cold Welding',
+      'Block Foundation Welding','Block Oil Seal','Dry Gear Bush Fitting','Oil Pump Repair'
+    ];
+
+    function populateRows() {
+      const tbody = document.querySelector('#estimateTable tbody');
+      tbody.innerHTML = '';
+      items.forEach((part, idx) => {
+        const row = tbody.insertRow();
+        row.insertCell().innerText = idx + 1;
+        row.insertCell().innerText = part;
+        const cellAmt = row.insertCell();
+        const inp = document.createElement('input');
+        inp.type = 'number';
+        inp.min = '0';
+        inp.step = '0.01';
+        inp.value = '';
+        inp.style.width = '100px';
+        inp.oninput = updateTotal;
+        cellAmt.appendChild(inp);
+      });
+      updateTotal();
+    }
+
+    function addRow() {
+      const tbody = document.querySelector('#estimateTable tbody');
+      const rowCount = tbody.rows.length;
+      const row = tbody.insertRow();
+      row.insertCell().innerText = rowCount + 1;
+      const pCell = row.insertCell();
+      const partInp = document.createElement('input');
+      partInp.type = 'text';
+      partInp.placeholder = 'Particular';
+      pCell.appendChild(partInp);
+      const amtCell = row.insertCell();
+      const amtInp = document.createElement('input');
+      amtInp.type = 'number'; amtInp.min = '0'; amtInp.step = '0.01';
+      amtInp.style.width = '100px';
+      amtInp.oninput = updateTotal;
+      amtCell.appendChild(amtInp);
+    }
+
+    function updateTotal() {
+      let total = 0;
+      document.querySelectorAll('#estimateTable tbody tr').forEach(row => {
+        const val = parseFloat(row.cells[2].firstChild.value) || 0;
+        total += val;
+      });
+      document.getElementById('totalAmt').innerText = total.toFixed(2);
+    }
+
+    function shareWhatsApp() {
+      const textLines = Array.from(document.querySelectorAll('#estimateTable tbody tr'))
+        .map(row => {
+          const part = row.cells[1].innerText || row.cells[1].firstChild.value;
+          const amt = row.cells[2].firstChild.value || '0';
+          return `${part}: ₹${parseFloat(amt).toFixed(2)}`;
+        });
+      const total = document.getElementById('totalAmt').innerText;
+      const message = `*Boring Estimate*%0A` +
+        textLines.join('%0A') +
+        `%0A*Total: ₹${total}*`;
+      const waUrl = `https://wa.me/?text=${message}`;
+      window.open(waUrl, '_blank');
+    }
+
+    populateRows();
+  </script>
+</body>
+</html>
